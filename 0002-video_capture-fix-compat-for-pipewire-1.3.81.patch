@@ -1,0 +1,63 @@
+From 9eca63f57a8bf36602e57ed9aeb356b37dd1850d Mon Sep 17 00:00:00 2001
+From: Zephyr Lykos <git@mochaa.ws>
+Date: Wed, 5 Mar 2025 03:43:37 +0800
+Subject: [PATCH 2/2] video_capture: fix compat for pipewire 1.3.81
+
+---
+ .../video_capture/linux/pipewire_session.cc   | 19 +++++++++++++++++--
+ 1 file changed, 17 insertions(+), 2 deletions(-)
+
+diff --git a/src/modules/video_capture/linux/pipewire_session.cc b/src/modules/video_capture/linux/pipewire_session.cc
+index 4d1b200a..6eacd78f 100644
+--- a/src/modules/video_capture/linux/pipewire_session.cc
++++ b/src/modules/video_capture/linux/pipewire_session.cc
+@@ -42,6 +42,17 @@ VideoType PipeWireRawFormatToVideoType(uint32_t id) {
+   }
+ }
+ 
++#ifndef pw_node_method
++#define pw_node_method(o, method, version, ...)                                \
++  ({                                                                           \
++    int _res = -ENOTSUP;                                                       \
++    spa_interface_call_res((struct spa_interface *)o, struct pw_node_methods,  \
++                           _res, method, version, ##__VA_ARGS__);              \
++    _res;                                                                      \
++  })
++#define should_undef_pw_node_method
++#endif
++
+ PipeWireNode::PipeWireNode(PipeWireSession* session,
+                            uint32_t id,
+                            const spa_dict* props)
+@@ -60,7 +71,7 @@ PipeWireNode::PipeWireNode(PipeWireSession* session,
+       .param = OnNodeParam,
+   };
+ 
+-  pw_node_add_listener(proxy_, &node_listener_, &node_events, this);
++  pw_node_method(proxy_, add_listener, 0, &node_listener_, &node_events, this);
+ }
+ 
+ PipeWireNode::~PipeWireNode() {
+@@ -94,7 +105,7 @@ void PipeWireNode::OnNodeInfo(void* data, const pw_node_info* info) {
+       uint32_t id = info->params[i].id;
+       if (id == SPA_PARAM_EnumFormat &&
+           info->params[i].flags & SPA_PARAM_INFO_READ) {
+-        pw_node_enum_params(that->proxy_, 0, id, 0, UINT32_MAX, nullptr);
++        pw_node_method(that->proxy_, enum_params, 0, 0, id, 0, UINT32_MAX, nullptr);
+         break;
+       }
+     }
+@@ -102,6 +113,10 @@ void PipeWireNode::OnNodeInfo(void* data, const pw_node_info* info) {
+   }
+ }
+ 
++#ifdef should_undef_pw_node_method
++#undef pw_node_method
++#endif
++
+ // static
+ void PipeWireNode::OnNodeParam(void* data,
+                                int seq,
+-- 
+2.48.1
+

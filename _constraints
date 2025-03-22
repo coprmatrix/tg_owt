@@ -1,0 +1,13 @@
+<constraints>
+  <!-- Default 35GB for binary packages -->
+  
+    <hardware>
+      <disk>
+        <size unit="G">45</size>
+      </disk>
+      <memory>
+        <size unit="G">16</size>
+      </memory>
+    </hardware>
+  
+</constraints>

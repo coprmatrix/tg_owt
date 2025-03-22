@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<services>
+  <service name="obs_scm">
+    <param name="filename">tg_owt</param>
+    <param name="url">https://github.com/desktop-app/tg_owt.git</param>
+    <param name="scm">git</param>
+    <param name="version">git-master</param>
+    <param name="versionformat">%cd</param>
+    <param name="revision">master</param>
+    <param name="changesgenerate">enable</param>
+    <param name="changesauthor">zuhhaga@gmail.com</param>
+  </service>
+  <service mode="buildtime" name="set_version"/>
+  <service name="tar" mode="buildtime"/>
+  <service name="recompress" mode="buildtime">
+    <param name="compression">gz</param>
+    <param name="file">*.tar</param>
+  </service>
+</services>

@@ -17,7 +17,7 @@ Summary:	WebRTC library for the Telegram Desktop
 Source0:	%{name}-%{version}.tar.gz
 
 Patch0:		0001-build-link-against-more-system-libraries-if-possible.patch
-Patch1:		0002-video_capture-fix-compat-for-pipewire-1.3.81.patch
+#Patch1:		0002-video_capture-fix-compat-for-pipewire-1.3.81.patch
 
 ExcludeArch: s390x
 
